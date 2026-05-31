@@ -11,9 +11,11 @@ async function signup(req,res){
     const {fullName,email,password} = req.body
 
     try {
-        if(!email,!password,!fullName) return res.status(400).json({message: "All fields are required"})
+        if (!email || !password || !fullName) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
 
-        if(password.length < 8) return res.status(400).json({message: "Password must be at least 8 characters long"})
+        if (password.length < 8) return res.status(400).json({message: "Password must be at least 8 characters long"})
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -57,7 +59,7 @@ async function signup(req,res){
         res.cookie("jwt",token,{
             maxAge: 7*24*60*60*1000,
             httpOnly: true,
-            sameSite: "strict",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             secure: process.env.NODE_ENV === "production"
         })
 
@@ -65,6 +67,7 @@ async function signup(req,res){
 
     } catch (error) {
         console.log("Error in signup:: ",error)
+        return res.status(500).json({message: "Internal Server Error"});
     }
 }
 async function login(req,res){
@@ -86,7 +89,7 @@ async function login(req,res){
         res.cookie("jwt",token,{
             maxAge: 7*24*60*60*1000,
             httpOnly: true,
-            sameSite: "strict",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             secure: process.env.NODE_ENV === "production"
         })
 
@@ -94,6 +97,7 @@ async function login(req,res){
 
     } catch (error) {
         console.log("Error in login function:: ",error)
+        return res.status(500).json({message: "Internal Server Error"});
     }
 }
 function logout(req,res){
